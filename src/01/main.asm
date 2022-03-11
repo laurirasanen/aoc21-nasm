@@ -9,7 +9,7 @@ global _start
 
 section .data
 
-file db "../input/01.txt", 0
+file db "../../input/01.txt", 0
 len equ 16000
 buffer resb len
 
