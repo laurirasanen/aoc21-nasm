@@ -70,31 +70,10 @@ main:
         call atoi
         add esp, 4
 
-        ; loop window offset
-        ; between 0, 4, 8
-        add byte [woffset], 4
-        cmp byte [woffset], 8
-        jle .end_offset
-        mov byte [woffset], 0
-        .end_offset:
-
         ; store line into window,
         ; replacing oldest value
-        ;mov dword [window + [woffset]], eax
-        .win_0:
-            cmp byte [woffset], 0
-            jne .win_4
-            mov dword [window], eax
-            jmp .end_window
-        .win_4:
-            cmp byte [woffset], 4
-            jne .win_8
-            mov dword [window + 4], eax
-            jmp .end_window
-        .win_8:
-            mov dword [window + 8], eax
-            jmp .end_window
-        .end_window:
+        mov ebx, [woffset]
+        mov dword [window + ebx], eax
 
         ; total value of window
         xor eax, eax
@@ -113,14 +92,18 @@ main:
         ; update prev window value
         mov dword [prev_window], eax
         
+        ; loop window offset
+        ; between 0, 4, 8.
         ; if offset has rolled back to 0,
         ; we have a read enough values
-        ; to have full prev window value.
+        ; to have full prev window value;
         ; start comparing next loop.
-        cmp byte [woffset], 0
-        jne .end_prev
+        add byte [woffset], 4
+        cmp byte [woffset], 8
+        jle .end_offset
+        mov byte [woffset], 0
         mov byte [has_prev], 1
-        .end_prev:
+        .end_offset:
 
         ; token = strtok(NULL, delim)
         push delim
