@@ -2,26 +2,31 @@
 ; https://adventofcode.com/2021/day/1
 ;
 ; compile:
-; nasm -f elf32 main.asm -o main.o && ld -m elf_i386 main.o -o main.out
+; nasm -f elf32 main.asm -o main.o && gcc -m32 main.o -o main.out
 
-global _start
-
+extern printf
+extern strtok
+extern atoi
+global main
 
 section .data
-
 file db "../../input/01.txt", 0
-len equ 16000
-buffer resb len
+delim db 0x0a ; \n
+out_str db "measurements larger than previous: %d", 0x0a, 0
+len equ 10000 ; 01.txt fits into 10kb
 
+section .bss
+buffer resb len
+count resd 1
+prev_line resd 1
 
 section .text
-
-_start:
+main:
     ; open file
     mov eax, 5 ; open
     mov ebx, file
-    mov ecx, 0 ; "r"
-    int 80h
+    mov ecx, 0 ; read-only
+    int 0x80
 
     ; store file descriptor
     push eax
@@ -31,22 +36,63 @@ _start:
     mov eax, 3 ; read
     mov ecx, buffer
     mov edx, len
-    int 80h
-
-    mov edx, eax ; num of bytes read
+    int 0x80
 
     ; close file
     mov eax, 6 ; close
     pop ebx ; file desc
-    int 80h
+    int 0x80
 
-    ; write buffer to terminal
-    mov eax, 4 ; write
-    mov ebx, 1 ; terminal
-    mov ecx, buffer
-    int 80h
+    mov dword [count], 0
+    mov dword [prev_line], 0x7fffffff
+
+    ; char *token = strtok(*buffer, delim)
+    push delim
+    push buffer
+    call strtok
+    add esp, 8
+
+    ; if token == NULL
+    cmp eax, 0
+    je .end
+
+    .loop:
+        ; atoi(token)
+        push eax
+        call atoi
+        add esp, 4
+
+        ; increment count if
+        ; larger than prev line
+        cmp eax, [prev_line]
+        jle .skip
+        inc dword [count]
+        .skip:
+
+        ; store prev line
+        mov dword [prev_line], eax
+
+        ; token = strtok(NULL, delim)
+        push delim
+        push 0
+        call strtok
+        add esp, 8
+
+        ; if token == NULL
+        cmp eax, 0
+        je .end
+
+        jmp .loop
+
+    .end:
+
+    ; printf(out_str, count)
+    push dword [count]
+    push out_str
+    call printf
+    add esp, 8
 
     ; exit
     mov eax, 1
     mov ebx, 0
-    int 80h
+    int 0x80

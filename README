@@ -1,5 +1,7 @@
-advent of code 2021 in x86 nasm
+advent of code 2021 in x86 nasm (and linux externs)
 https://adventofcode.com/2021
+
+sudo apt install nasm gcc gcc-multilib
 
    /´´´^\
   /   ¨|´*
