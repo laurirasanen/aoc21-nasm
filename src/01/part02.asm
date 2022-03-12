@@ -1,8 +1,8 @@
 ; advent of code 2021 - day 1, part 2
 ; https://adventofcode.com/2021/day/1
 ;
-; compile:
-; nasm -f elf32 part02.asm -o part02.o && gcc -m32 part02.o -o part02.out
+; run:
+; nasm -f elf32 part02.asm -o part02.o && gcc -m32 part02.o -o part02.out && ./part02.out
 
 extern printf
 extern strtok
