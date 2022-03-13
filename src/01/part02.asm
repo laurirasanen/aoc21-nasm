@@ -11,7 +11,7 @@ global main
 
 section .data
 file db "../../input/01.txt", 0
-delim db 0x0a ; \n
+delim db 0x0a, 0 ; \n
 out_str db "three-measurement windows larger than previous: %d", 0x0a, 0
 len equ 10000 ; 01.txt fits into 10kb
 
